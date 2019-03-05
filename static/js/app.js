@@ -1,59 +1,104 @@
 // from data.js
 var tableData = data;
 
+// Function to populate the table with given 'dataset'
+function populateTable(dataset) {
+  dataset.forEach((data) => {
+    
+    var row = d3.select("tbody").append("tr");
+    Object.entries(data).forEach(([key, value]) => {
+      var cell = row.append("td");
+      cell.text(value);
+    });
+  });
+}
+
+// Function to populate the drowdown list with 'dropdownValues' to element 'elem'
+function populateDropdown(elem, dropdownValues) {
+  dropdownValues.forEach((dropdown) => {
+    var option = document.createElement("option");
+    option.text = dropdown;
+    option.value = dropdown;
+    elem.add(option); 
+  });
+}
+
+function multiFilter(array, filters) {
+  const filterKeys = Object.keys(filters);
+  // filters all elements passing the criteria
+  return array.filter((item) => {
+    // dynamically validate all filter criteria
+    return filterKeys.every(key => {
+      // ignores an empty filter
+      if (!filters[key].length) return true;
+      return filters[key].includes(item[key]);
+    });
+  });
+}
+
+// Find out unique values of City/State/Country/Shape to compose filter dropdowns
+var cities = tableData.map(item => item.city).filter((value, index, self) => self.indexOf(value) === index);
+var states = tableData.map(item => item.state).filter((value, index, self) => self.indexOf(value) === index);
+var countries = tableData.map(item => item.country).filter((value, index, self) => self.indexOf(value) === index);
+var shapes = tableData.map(item => item.shape).filter((value, index, self) => self.indexOf(value) === index);
+
+// Populate City dropdown
+var citySelect = document.getElementById("city"); 
+populateDropdown(citySelect, cities);
+
+// Populate State dropdown
+var stateSelect = document.getElementById("state"); 
+populateDropdown(stateSelect, states);
+
+// Populate Country dropdown
+var countrySelect = document.getElementById("country"); 
+populateDropdown(countrySelect, countries);
+/*for( country in countries ) {
+  var option = document.createElement("option");
+  option.text = countries[country];
+  countrySelect.add(option);  
+}; */
+
+// Populate Shape dropdown
+var shapeSelect = document.getElementById("shape"); 
+populateDropdown(shapeSelect, shapes);
+
+// Filter criteria
+var criteria = [];
+
 // Select the submit button
 var submit = d3.select("#filter-btn");
 
+// Action when Filter Data button is clicked
 submit.on("click", function() {
+
+  // Filter criteria
+  var criteria = [];
 
   // Prevent the page from refreshing
   d3.event.preventDefault();
 
   // Remove all old result rows
   d3.selectAll("tr").remove();
+
+  // Get the value property of the datetime field
+  var datetimeValue = d3.select(".form-control").property("value");
+  if (datetimeValue != "")
+    criteria.push({datetime: datetimeValue});
   
-  // Select the input element and get the raw HTML node
-  var inputElement = d3.select(".form-control");
+  var cityValue = d3.select("#city").property("value");
+  if (cityValue != "Choose a City")
+    criteria.push({city: cityValue});
 
-  // Get the value property of the input element
-  var inputValue = inputElement.property("value");
+    console.log(criteria);
 
-  console.log(inputValue);
-  console.log(tableData);
+  //var filteredData = tableData.filter(ufodata => ufodata.datetime === datetimeValue && ufodata.city === cityValue);
 
-  var filteredData = tableData.filter(person => person.datetime === inputValue);
-
+  var filteredData = multiFilter(tableData, criteria);
   console.log(filteredData);
 
-  filteredData.forEach((resultData) => {
-    
-    var row = d3.select("tbody").append("tr");
-    Object.entries(resultData).forEach(([key, value]) => {
-      var cell = row.append("td");
-      cell.text(value);
-    });
-  });
-
-/*
-  // BONUS: Calculate summary statistics for the age field of the filtered data
-
-  // First, create an array with just the age values
-  var ages = filteredData.map(person => person.age);
-
-  // Next, use math.js to calculate the mean, median, mode, var, and std of the ages
-  var mean = math.mean(ages);
-  var median = math.median(ages);
-  var mode = math.mode(ages);
-  var variance = math.var(ages);
-  var standardDeviation = math.std(ages);
-
-  // Finally, add the summary stats to the `ul` tag
-  d3.select(".summary")
-    .append("li").text(`Mean: ${mean}`)
-    .append("li").text(`Median: ${median}`)
-    .append("li").text(`Mode: ${mode}`)
-    .append("li").text(`Variance: ${variance}`)
-    .append("li").text(`Standard Deviation: ${standardDeviation}`); */
+  // Populate the table with result set
+  populateTable(filteredData);
 });
 
 
