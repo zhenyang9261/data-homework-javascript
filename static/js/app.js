@@ -14,6 +14,7 @@ function populateTable(dataset) {
 }
 
 // Function to populate the drowdown list with 'dropdownValues' to element 'elem'
+// @param {}
 function populateDropdown(elem, dropdownValues) {
   dropdownValues.forEach((dropdown) => {
     var option = document.createElement("option");
@@ -23,6 +24,7 @@ function populateDropdown(elem, dropdownValues) {
   });
 }
 
+/*
 function multiFilter(array, filters) {
   const filterKeys = Object.keys(filters);
   // filters all elements passing the criteria
@@ -34,7 +36,7 @@ function multiFilter(array, filters) {
       return filters[key].includes(item[key]);
     });
   });
-}
+} */
 
 // Find out unique values of City/State/Country/Shape to compose filter dropdowns
 var cities = tableData.map(item => item.city).filter((value, index, self) => self.indexOf(value) === index);
@@ -53,11 +55,6 @@ populateDropdown(stateSelect, states);
 // Populate Country dropdown
 var countrySelect = document.getElementById("country"); 
 populateDropdown(countrySelect, countries);
-/*for( country in countries ) {
-  var option = document.createElement("option");
-  option.text = countries[country];
-  countrySelect.add(option);  
-}; */
 
 // Populate Shape dropdown
 var shapeSelect = document.getElementById("shape"); 
@@ -86,15 +83,43 @@ submit.on("click", function() {
   if (datetimeValue != "")
     criteria.push({datetime: datetimeValue});
   
+  // Get the value property of the city
   var cityValue = d3.select("#city").property("value");
   if (cityValue != "Choose a City")
     criteria.push({city: cityValue});
 
-    console.log(criteria);
+  // Get the value property of the state
+  var stateValue = d3.select("#state").property("value");
+  if (stateValue != "Choose a State")
+    criteria.push({state: stateValue});
+
+  // Get the value property of the country
+  var countryValue = d3.select("#country").property("value");
+  if (countryValue != "Choose a Country")
+    criteria.push({country: countryValue});
+
+  // Get the value property of the shape
+  var shapeValue = d3.select("#shape").property("value");
+  if (shapeValue != "Choose a Shape")
+    criteria.push({shape: shapeValue});
+  
+  console.log(criteria);
 
   //var filteredData = tableData.filter(ufodata => ufodata.datetime === datetimeValue && ufodata.city === cityValue);
 
-  var filteredData = multiFilter(tableData, criteria);
+  filteredData = tableData.filter(function(item) {
+    var i, ntest, cKey, cValue, flag;
+    
+    for(i=0, ntest=criteria.length; i<ntest; ++i) {
+      console.log(Object.keys(criteria[i]))
+        cKey = Object.keys(criteria[i]);
+        cValue = Object.values(criteria[i]);
+        if(item[cKey] != cValue) return false;
+    }
+    return true;
+  });
+  
+  //var filteredData = multiFilter(tableData, criteria);
   console.log(filteredData);
 
   // Populate the table with result set
