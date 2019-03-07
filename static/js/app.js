@@ -33,27 +33,45 @@ function populateDropdown(elem, dropdownValues) {
   });
 }
 
+/**
+ * Function to remove leading zero from a date string.
+ * Example: input 01/01/2018, output 1/1/2018 
+ * @param {String} dateInput, the date string to convert 
+ */
+function convertDate (dateInput) {
+  var tokens = dateInput.split('/'),
+  mm = tokens[0],
+  dd = tokens[1];
+
+  if (mm.charAt(0) === '0') 
+    tokens[0] = mm.replace("0", "");
+  if (dd.charAt(0) === '0') 
+    tokens[1] = dd.replace("0", "");
+
+  return tokens[0] + "/" + tokens[1] + "/" + tokens[2];
+}
+
 // Find out unique values of City/State/Country/Shape to compose filter dropdowns
 var cities = tableData.map(item => item.city).filter((value, index, self) => self.indexOf(value) === index);
 var states = tableData.map(item => item.state).filter((value, index, self) => self.indexOf(value) === index);
 var countries = tableData.map(item => item.country).filter((value, index, self) => self.indexOf(value) === index);
 var shapes = tableData.map(item => item.shape).filter((value, index, self) => self.indexOf(value) === index);
 
-// Populate City dropdown
+// Populate City dropdown, sort alphabetically
 var citySelect = document.getElementById("city"); 
-populateDropdown(citySelect, cities);
+populateDropdown(citySelect, cities.sort());
 
-// Populate State dropdown
+// Populate State dropdown, sort alphabetically
 var stateSelect = document.getElementById("state"); 
-populateDropdown(stateSelect, states);
+populateDropdown(stateSelect, states.sort());
 
-// Populate Country dropdown
+// Populate Country dropdown, sort alphabetically
 var countrySelect = document.getElementById("country"); 
-populateDropdown(countrySelect, countries);
+populateDropdown(countrySelect, countries.sort());
 
-// Populate Shape dropdown
+// Populate Shape dropdown, sort alphabetically
 var shapeSelect = document.getElementById("shape"); 
-populateDropdown(shapeSelect, shapes);
+populateDropdown(shapeSelect, shapes.sort());
 
 // Display all data
 populateTable(tableData, "tbody");
@@ -71,12 +89,18 @@ submit.on("click", function() {
   d3.event.preventDefault();
 
   // Remove all old result rows
-  d3.selectAll("tr").remove();
+  d3.select("tbody").html("");
 
   // Get the value property of the datetime field if entered, and put into the filter
-  var datetimeValue = d3.select(".form-control").property("value");
-  if (datetimeValue != "")
+  // jQuery datepicker returns date in the format of mm/dd/yyyy
+  // Dataset date strings are in the same format except for no leading 0
+  // Need to call convertDate function to remove leading 0s 
+  var datetimeValueRaw = d3.select(".form-control").property("value");
+  if (datetimeValueRaw != "") {
+    datetimeValue = convertDate(datetimeValueRaw);
+    console.log(datetimeValue);
     criteria.push({datetime: datetimeValue});
+  }
   
   // Get the value property of the city if a city is selected, and put into the filter
   var cityValue = d3.select("#city").property("value");
@@ -109,7 +133,7 @@ submit.on("click", function() {
     var filterCounter = criteria.length;
     var i, ckey, cValue;
     var filteredData = tableData.filter(function(item) {
-      for(i=0, ntest=criteria.length; i<ntest; ++i) {
+      for(i=0; i<filterCounter; ++i) {
         //console.log(Object.keys(criteria[i]))
         cKey = Object.keys(criteria[i]);
         cValue = Object.values(criteria[i]);
