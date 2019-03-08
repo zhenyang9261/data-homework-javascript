@@ -3,13 +3,11 @@ var tableData = data;
 
 /**
  * Function to populate HTML table with given dataset
- * @param {Array[Object], String} dataset, tag: 
- * - the dataset to populate the table
- * - the tag/class/id to identify the table element in HTML
+ * @param {Array[Object]} dataset: the dataset to populate the table
+ * @param {String} tag: the dataset to populate the table
  */
 function populateTable(dataset, tag) {
-  dataset.forEach((data) => {
-    
+  dataset.forEach((data) => {    
     var row = d3.select(tag).append("tr");
     Object.entries(data).forEach(([key, value]) => {
       var cell = row.append("td");
@@ -20,9 +18,8 @@ function populateTable(dataset, tag) {
 
 /**
  * Function to populate dropdown list with given values 
- * @param {Object, Array} elem, dropdownValues: 
- * - the table element
- * - the array of values to populate the dropdown
+ * @param {Object} elem: the table element
+ * @param {Array} dropdownValues: the array of values to populate the dropdown
  */
 function populateDropdown(elem, dropdownValues) {
   dropdownValues.forEach((dropdown) => {
@@ -34,7 +31,7 @@ function populateDropdown(elem, dropdownValues) {
 }
 
 /**
- * Function to remove leading zero from a date string.
+ * Function to remove leading zeros from a date string.
  * Example: input 01/01/2018, output 1/1/2018 
  * @param {String} dateInput, the date string to convert 
  */
@@ -78,7 +75,7 @@ populateTable(tableData, "tbody");
 
 // Select the submit button
 var submit = d3.select("#filter-btn");
-
+  
 // Action when Filter Data button is clicked
 submit.on("click", function() {
 
